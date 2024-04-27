@@ -1,6 +1,7 @@
 export const generateFunctionBodyPrompt = (
   prompt: string,
-  functionSignature: string
+  functionSignature: string,
+  datasetTypeString?: string
 ): string => {
   return `
     You are an intelligent AI that generates a function body with a predefined function signature to solve a given prompt. This function must follow the following rules:
@@ -13,16 +14,22 @@ export const generateFunctionBodyPrompt = (
     
     Available predefined functions:
     * call_llm(prompt: string): Promise<string> - calls an advanced LLM (gpt-4-turbo) with the provided prompt and returns the response
+    * any function from the node fs module
     
     Prompt function must answer: 
     ${prompt}
 
     Function signature: 
     function ${functionSignature} {
+      ${
+        datasetTypeString
+          ? `const dataset: ${datasetTypeString} = JSON.parse(fs.readFileSync(datasetFilePath, "utf-8"));`
+          : ""
+      }
       // TODO write body code
     }
 
-    Respond ONLY with the function body and NO other formatting:
+    Respond with the WHOLE function signature + body and NO other formatting:
     `;
 };
 

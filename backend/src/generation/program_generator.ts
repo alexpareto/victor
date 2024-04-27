@@ -9,7 +9,7 @@ export const initProgram = async (
   description: string,
   datasetTypeString: string
 ): Promise<Program> => {
-  const initalProgramSignature = `solvePrompt(dataset: ${datasetTypeString}): Promise<string>`;
+  const initalProgramSignature = `solvePrompt(datasetFilePath: string): Promise<string>`;
   const programName = `solvePrompt`;
 
   // recursively generate the function bodies
@@ -17,6 +17,7 @@ export const initProgram = async (
     description,
     name: programName,
     signature: initalProgramSignature,
+    datasetTypeString: datasetTypeString,
   });
 };
 
@@ -24,6 +25,7 @@ type ProgramGenerationDetails = {
   description: string; // description of what the function should do
   name: string; // name of function
   signature: string;
+  datasetTypeString?: string;
 };
 
 // recursively generates all the programs and then saves them to the DB
@@ -81,7 +83,8 @@ const generateFunctionBody = async (
 ): Promise<string> => {
   const prompt = generateFunctionBodyPrompt(
     details.description,
-    details.signature
+    details.signature,
+    details.datasetTypeString
   );
 
   const response = await chatCompletion({

@@ -42,8 +42,9 @@ app.post("/api/programs", async (req: Request, res: Response) => {
   // get program with versions and return it
   const programWithVersions = await prisma.program.findFirstOrThrow({
     where: { id: program.id },
-    include: { versions: true },
+    include: { versions: { include: { program: true } } },
   });
+  console.log(programWithVersions);
 
   const results = await executeProgram(programWithVersions, showsJsonFilePath);
 
