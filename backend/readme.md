@@ -46,6 +46,12 @@ To browse data use:
 yarn prisma studio
 ```
 
+# Running files
+
+```
+npx ts-node src/playground.ts
+```
+
 # Notebooks
 Buggy, but still potentially helpful.
 
