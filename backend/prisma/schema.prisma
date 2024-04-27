@@ -47,22 +47,33 @@ model Inference {
 }
 
 model Program {
+  id        Int      @id @default(autoincrement())
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  versions ProgramVersion[]
+}
+
+model ProgramVersion {
   id          Int      @id @default(autoincrement())
   body        String
-  name        String
   signature   String
   description String
   fitness     Float    @default(0.0)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
+  programId Int
+  program   Program @relation(fields: [programId], references: [id])
+
   invocations ProgramInvocation[]
 }
 
 model ProgramInvocation {
   id                   Int                 @id @default(autoincrement())
-  program              Program             @relation(fields: [programId], references: [id])
-  programId            Int
+  programVersion       ProgramVersion      @relation(fields: [programVersionId], references: [id])
+  programVersionId     Int
   inputArgs            Json
   outputArgs           Json
   previousInvocation   ProgramInvocation?  @relation("InvocationGraph", fields: [previousInvocationId], references: [id])
@@ -72,5 +83,5 @@ model ProgramInvocation {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@index([programId])
+  @@index([programVersionId])
 }
