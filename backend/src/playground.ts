@@ -56,6 +56,9 @@ async function createSamples() {
         },
       },
     },
+    include: {
+      program: true,
+    },
   });
 
   const result = await runProgram(fibVersion, [10]);

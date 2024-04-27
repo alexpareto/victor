@@ -1,6 +1,10 @@
 import { prisma } from "@/clients";
 import { executePrograms, type ExecuteResult } from "@/execution/execute";
-import { Program, ProgramVersion } from "@prisma/client";
+import {
+  Program,
+  ProgramVersion,
+  type ProgramInvocation,
+} from "@prisma/client";
 
 const getAllProgramVersionDependencies = async (
   programVersion: ProgramVersion
@@ -31,6 +35,7 @@ const getAllProgramVersionDependencies = async (
         },
         include: {
           dependencies: true,
+          program: true,
         },
       });
 
@@ -43,10 +48,18 @@ const getAllProgramVersionDependencies = async (
   return allProgramVersionDepedencies;
 };
 
+type ExecutionNode = {
+  id: string;
+  name: string;
+  inputArgs: any;
+  output: any | null;
+  children: ExecutionNode[];
+};
+
 export const runProgram = async (
   programVersion: ProgramVersion,
   args: any[]
-): Promise<ExecuteResult> => {
+): Promise<ExecuteResult | ProgramInvocation> => {
   const programVersionDependencies = await getAllProgramVersionDependencies(
     programVersion
   );
@@ -78,5 +91,44 @@ export const runProgram = async (
 const result = runProgram(${program!.name}, rawArgs)
   `;
 
-  return executePrograms(programToRun);
+  const result = await executePrograms(programToRun);
+
+  if (result.errorType !== null) {
+    return result;
+  }
+
+  const rootNode = result.value;
+
+  let rootInvocation: ProgramInvocation | null = null;
+
+  const createProgramInvocations = async (
+    node: ExecutionNode,
+    previousInvocationId: number | null = null
+  ) => {
+    const programVersionForNode = allProgramVersions.find(
+      (pv) => (pv as any).program.name === node.name
+    )!;
+    const programInvocation = await prisma.programInvocation.create({
+      data: {
+        programVersion: { connect: { id: programVersionForNode.id } },
+        inputArgs: node.inputArgs,
+        outputArgs: node.output,
+        previousInvocation: previousInvocationId
+          ? { connect: { id: previousInvocationId } }
+          : undefined,
+      },
+    });
+
+    if (previousInvocationId === null) {
+      rootInvocation = programInvocation;
+    }
+
+    for (const child of node.children) {
+      await createProgramInvocations(child, programInvocation.id);
+    }
+  };
+
+  await createProgramInvocations(rootNode);
+
+  return rootInvocation!; // Return the root invocation from runProgram
 };
