@@ -6,7 +6,8 @@
       "jsx": "preserve",
       "esModuleInterop": true,
       "skipLibCheck": true,
-      "forceConsistentCasingInFileNames": true
+      "forceConsistentCasingInFileNames": true,
+      "sourceMap": true
     },
     "include": ["src/**/*"]
   }

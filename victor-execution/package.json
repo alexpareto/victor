@@ -13,5 +13,8 @@
     "@babel/core": "^7.24.4",
     "@babel/preset-typescript": "^7.24.1",
     "typescript": "^5.4.5"
+  },
+  "dependencies": {
+    "@babel/plugin-syntax-typescript": "^7.24.1"
   }
 }

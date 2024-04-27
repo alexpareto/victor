@@ -1,4 +1,8 @@
 {
-    "presets": ["@babel/preset-typescript"]
+    "presets": ["@babel/preset-typescript"],
+    "plugins": [
+      "./wrap-fns.js"
+    ],
+  
   }
   
