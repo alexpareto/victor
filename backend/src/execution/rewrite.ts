@@ -8,14 +8,14 @@ import { chatCompletion } from "@/inference/inference";
 import { ProgramVersion } from "@prisma/client";
 
 export const rewriteProgram = async (
-  programVersion: ProgramVersion,
+  programVersions: ProgramVersion[],
   error: string,
   errorType: ErrorType
-): Promise<ProgramVersion> => {
-  console.log("rewriting ", programVersion.body);
+) => {
+  console.log("rewriting ", programVersions.map((v) => v.body).join("\n"));
   const rewriteProgramSystemPrompt = rewriteProgramSystemTemplate();
   const rewriteProgramUserPrompt = rewriteProgramUserTemplate(
-    programVersion.body,
+    programVersions.map((v) => v.body).join("\n"),
     `Error Type: ${errorType}\nError: ${error}`
   );
 
@@ -26,18 +26,40 @@ export const rewriteProgram = async (
       { role: "user", content: rewriteProgramUserPrompt },
     ],
     name: "rewrite",
+    temperature: 0.2,
+    useCache: false,
   });
 
+  const newFunctionCode = inference.output;
+  const functionNameMatch = newFunctionCode.match(/function (\w+)\(/);
+  const functionName = functionNameMatch ? functionNameMatch[1] : null;
+
+  let programVersion: ProgramVersion | null = null;
+  const chosenProgramVersion = programVersions.find(
+    (v) => (v as any).program.name === functionName
+  );
+
+  if (chosenProgramVersion!.runTries > 3) {
+    await prisma.programVersion.update({
+      where: { id: chosenProgramVersion!.id },
+      data: {
+        body: inference.output,
+        updatedAt: new Date(),
+        runTries: chosenProgramVersion!.runTries + 1,
+        fitness: 0,
+      },
+    });
+    throw new Error("Maximum number of rewriting retries reached");
+  }
+
   const updatedProgramVersion = await prisma.programVersion.update({
-    where: { id: programVersion.id },
+    where: { id: chosenProgramVersion!.id },
     data: {
       body: inference.output,
       updatedAt: new Date(),
-      runTries: programVersion.runTries + 1,
+      runTries: chosenProgramVersion!.runTries + 1,
     },
   });
 
   console.log("rewritten ", updatedProgramVersion.body);
-
-  return updatedProgramVersion;
 };

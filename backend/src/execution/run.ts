@@ -60,19 +60,28 @@ type ExecutionNode = {
 const MAX_RUN_RETRIES = 3;
 
 export const runProgram = async (
-  programVersion: ProgramVersion,
+  programVersionIn: ProgramVersion,
   args: any[]
 ): Promise<ExecuteResult | ProgramInvocation> => {
+  let programVersion = await prisma.programVersion.findFirst({
+    where: {
+      id: programVersionIn.id,
+    },
+    include: {
+      program: true,
+    },
+  });
+
   const programVersionDependencies = await getAllProgramVersionDependencies(
-    programVersion
+    programVersion!
   );
   console.log("Dependencies", programVersionDependencies);
 
-  const allProgramVersions = [...programVersionDependencies, programVersion];
+  const allProgramVersions = [...programVersionDependencies, programVersion!];
 
   const program = await prisma.program.findFirst({
     where: {
-      id: programVersion.programId,
+      id: programVersion!.programId,
     },
   });
 
@@ -97,17 +106,13 @@ const result = runProgram(${program!.name}, rawArgs)
   const result = await executePrograms(programToRun);
 
   if (result.errorType !== null) {
-    if (programVersion.runTries > MAX_RUN_RETRIES) {
+    try {
+      await rewriteProgram(allProgramVersions, result.error!, result.errorType);
+    } catch (e) {
       return result;
     }
 
-    const updatedProgramVersion = await rewriteProgram(
-      programVersion,
-      result.error!,
-      result.errorType
-    );
-
-    return runProgram(updatedProgramVersion, args);
+    return runProgram(programVersion!, args);
   }
 
   const rootNode = result.value;
@@ -118,6 +123,7 @@ const result = runProgram(${program!.name}, rawArgs)
     node: ExecutionNode,
     previousInvocationId: number | null = null
   ) => {
+    console.log(allProgramVersions);
     const programVersionForNode = allProgramVersions.find(
       (pv) => (pv as any).program.name === node.name
     )!;
