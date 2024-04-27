@@ -8,15 +8,17 @@ export const generateFunctionBodyPrompt = (
     * Your function must follow the signature provided
     * You may ONLY use any of the "predefined" functions below 
     * You may NOT create new sub-functions
+    * Always log your result to the console before returning it
+    * Your function MUST pass all typechecks and be properly typed
     
     Available predefined functions:
-    * call_llm(prompt, output) - calls an advanced LLM (gpt-4-turbo) with the provided prompt and output format
+    * call_llm(prompt: string): Promise<string> - calls an advanced LLM (gpt-4-turbo) with the provided prompt and returns the response
     
     Prompt function must answer: 
     ${prompt}
 
     Function signature: 
-    ${functionSignature} {
+    function ${functionSignature} {
       // TODO write body code
     }
 

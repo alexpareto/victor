@@ -1,4 +1,4 @@
-import { TVShows } from "@/datasets/tv_shows";
+import { TVShows, showsTypeString } from "@/datasets/tv_shows";
 import { chatCompletion } from "../inference/inference";
 import { generateFunctionBodyPrompt } from "../prompts";
 import { prisma } from "@/clients";
@@ -7,10 +7,9 @@ import { Program } from "@prisma/client";
 // for now datasets aren't generic, can figure that out later
 export const initProgram = async (
   description: string,
-  dataset: TVShows[]
+  datasetTypeString: string
 ): Promise<Program> => {
-  const datasetTypeString = `{transcript: string; metadata: {show: string; season: string; episode: string; title: string}}[]`;
-  const initalProgramSignature = `solvePrompt(prompt: String, dataset: ${datasetTypeString}): string`;
+  const initalProgramSignature = `solvePrompt(dataset: ${datasetTypeString}): Promise<string>`;
   const programName = `solvePrompt`;
 
   // recursively generate the function bodies
