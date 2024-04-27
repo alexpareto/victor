@@ -28,6 +28,7 @@ const generateFunctionBody = async (
   const response = await chatCompletion({
     model: "gpt-4-turbo",
     messages: [{ content: prompt, role: "system" }],
+    useCache: false,
   });
 
   return response.output;
