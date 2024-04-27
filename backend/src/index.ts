@@ -2,7 +2,8 @@ import express, { Express, Request, Response } from "express";
 import dotenv from "dotenv";
 import cors from "cors";
 import { prisma } from "./clients";
-import { generateFunctionBodies } from "./function_generator";
+import { initProgram } from "./generation/program_generator";
+import { shows } from "./datasets/tv_shows";
 
 dotenv.config();
 
@@ -27,6 +28,22 @@ app.post("/api/test-model", async (req: Request, res: Response) => {
       .status(500)
       .json({ error: `Error creating test model: ${error.message}` });
   }
+});
+
+app.post("/api/programs", async (req: Request, res: Response) => {
+  const { prompt } = req.body;
+  console.log("got body", req.body);
+  if (!prompt) {
+    return res.status(400);
+  }
+
+  const program = await initProgram(prompt, shows);
+  // get program with versions and return it
+  const programWithVersions = await prisma.program.findFirst({
+    where: { id: program.id },
+    include: { versions: true },
+  });
+  res.status(201).json({ program: programWithVersions });
 });
 
 app.listen(port, async () => {

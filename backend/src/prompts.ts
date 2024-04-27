@@ -1,14 +1,3 @@
-function getTypeAsString(type: any): string {
-  let result = "";
-  for (const key in type) {
-    if (type.hasOwnProperty(key)) {
-      const elem = type[key];
-      result += `${key}: ${typeof elem}, `;
-    }
-  }
-  return `{ ${result.slice(0, -2)} }`;
-}
-
 export const generateFunctionBodyPrompt = (
   prompt: string,
   functionSignature: string
@@ -31,7 +20,7 @@ export const generateFunctionBodyPrompt = (
       // TODO write body code
     }
 
-    Respond ONLY with the function body:
+    Respond ONLY with the function body and NO other formatting:
     `;
 };
 
