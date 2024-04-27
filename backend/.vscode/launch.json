@@ -1,0 +1,30 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+
+
+      {
+        "name": "Run playground",
+        "type": "node",
+        "request": "launch",
+        "runtimeExecutable": "node",
+        "runtimeArgs": ["--nolazy", "-r", "ts-node/register/transpile-only"],
+        "args": ["${file}"],
+        "cwd": "${workspaceRoot}",
+        "internalConsoleOptions": "openOnSessionStart",
+        "skipFiles": ["<node_internals>/**", "node_modules/**"]
+      },
+
+      {
+        "name": "Run server",
+        "type": "node",
+        "request": "launch",
+        "runtimeExecutable": "npx",
+        "runtimeArgs": ["nodemon"],
+        "cwd": "${workspaceRoot}",
+        "internalConsoleOptions": "openOnSessionStart",
+        "skipFiles": ["<node_internals>/**", "node_modules/**"]
+      }
+
+    ]
+  }
