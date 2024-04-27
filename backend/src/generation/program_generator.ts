@@ -10,7 +10,7 @@ export const initProgram = async (
   dataset: TVShows[]
 ): Promise<Program> => {
   const datasetTypeString = `{transcript: string; metadata: {show: string; season: string; episode: string; title: string}}[]`;
-  const initalProgramSignature = `function solvePrompt(prompt: String, dataset: ${datasetTypeString})`;
+  const initalProgramSignature = `solvePrompt(prompt: String, dataset: ${datasetTypeString}): string`;
   const programName = `solvePrompt`;
 
   // recursively generate the function bodies
