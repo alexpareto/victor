@@ -9,13 +9,20 @@ module.exports = function ({ types: t }) {
           if (!isTargetFile) {
             return; // Skip the plugin logic if not the target file
           }
+          console.log("ADD import")
           const importSpecifier = t.importSpecifier(t.identifier('updateState'), t.identifier('updateState'));
           const importDeclaration = t.importDeclaration([importSpecifier], t.stringLiteral('./core'));
           path.node.body.unshift(importDeclaration); // Add the import at the beginning of the file
 
         },
         FunctionDeclaration(path, state) {
-          // The rest of your transformation logic here
+            const filename = state.filename;
+            const isTargetFile = filename.includes('programs.ts');
+    
+            if (!isTargetFile) {
+              return; // Skip the plugin logic if not the target file
+            }
+            // The rest of your transformation logic here
           const funcName = path.node.id.name;
           const originalFuncName = `${funcName}_original`;
   
@@ -29,7 +36,7 @@ module.exports = function ({ types: t }) {
                 t.assignmentExpression(
                   "=",
                   t.identifier("state"),
-                  t.callExpression(t.identifier("updateState"), [t.identifier("state")])
+                  t.callExpression(t.identifier("_core.updateState"), [t.identifier("state")])
                 )
               ),
               t.returnStatement(
