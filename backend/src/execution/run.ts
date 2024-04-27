@@ -62,14 +62,21 @@ export const runProgram = async (
 
   const formattedArgs = JSON.stringify(args);
   const programToRun = `
-const rawArgs = "${formattedArgs}"
-const args = JSON.parse(rawArgs)
-const result = (<any>${program!.name})(...args)
-console.log(JSON.stringify(result))
+  import { runProgram } from "./core";
+  import { updateState, updateStateResult } from "./core";
+  
+  function __import_hack() {
+    return {
+      updateState,
+      updateStateResult,
+    };
+  }
+  
+  ${allProgramVersions.map((pv) => pv.body).join("\n")}
+
+  const rawArgs = "${formattedArgs}"
+const result = runProgram(${program!.name}, rawArgs)
   `;
 
-  return executePrograms(
-    allProgramVersions.map((pv) => pv.body),
-    programToRun
-  );
+  return executePrograms(programToRun);
 };

@@ -5,7 +5,7 @@ import { prisma } from "@/clients";
 import { runProgram } from "@/execution/run";
 
 const ADD_FN = `
-function add(a, b: number)  {
+function add(a: number, b: number)  {
     return a + b;
 }
 `;

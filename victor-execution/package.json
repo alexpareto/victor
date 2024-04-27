@@ -16,6 +16,7 @@
     "typescript": "^5.4.5"
   },
   "dependencies": {
-    "@babel/plugin-syntax-typescript": "^7.24.1"
+    "@babel/plugin-syntax-typescript": "^7.24.1",
+    "uuidv4": "^6.2.13"
   }
 }

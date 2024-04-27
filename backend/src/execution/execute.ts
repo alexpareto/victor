@@ -39,14 +39,11 @@ type ExecException = {
 };
 
 export const executePrograms = async (
-  programs: string[],
   programToRun: string
 ): Promise<ExecuteResult> => {
   const filePath = path.join(EXECUTION_ENVIRONMENT_PATH, "src/programs.ts");
 
-  const programFile = programs.join("\n") + "\n" + programToRun;
-
-  fs.writeFileSync(filePath, programFile);
+  fs.writeFileSync(filePath, programToRun);
 
   try {
     const { stdout: stdoutTypeCheck, stderr: stderrTypeCheck } =

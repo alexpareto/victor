@@ -26,8 +26,7 @@ module.exports = function ({ types: t }) {
                   t.assignmentExpression(
                     "=",
                     t.identifier("nodeId"),
-                    t.callExpression(t.identifier("updateState"), [t.identifier("state")])
-                  )
+                    t.callExpression(t.identifier("updateState"), [t.identifier("state"), t.stringLiteral(funcName), ...path.node.params.map(param => t.identifier(param.name))])                  )
                 ),
                 t.variableDeclaration("const", [                  t.variableDeclarator(
                     t.identifier("originalResult"),
@@ -39,6 +38,7 @@ module.exports = function ({ types: t }) {
                 ]),
                 t.expressionStatement(
                   t.callExpression(t.identifier("updateStateResult"), [
+                    t.identifier("state"),
                     t.identifier("nodeId"),
                     t.identifier("originalResult")
                   ])
