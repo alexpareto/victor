@@ -1,0 +1,16 @@
+{
+  "name": "victor-execution",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "build": "babel src --out-dir dist --extensions '.ts,.tsx' --source-maps inline",
+    "type-check": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.24.1",
+    "@babel/core": "^7.24.4",
+    "@babel/preset-typescript": "^7.24.1",
+    "typescript": "^5.4.5"
+  }
+}
