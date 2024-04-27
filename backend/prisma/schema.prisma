@@ -45,3 +45,32 @@ model Inference {
 
   @@index([cacheKey, createdAt(sort: Desc)])
 }
+
+model Program {
+  id          Int      @id @default(autoincrement())
+  body        String
+  name        String
+  signature   String
+  description String
+  fitness     Float    @default(0.0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  invocations ProgramInvocation[]
+}
+
+model ProgramInvocation {
+  id                   Int                 @id @default(autoincrement())
+  program              Program             @relation(fields: [programId], references: [id])
+  programId            Int
+  inputArgs            Json
+  outputArgs           Json
+  previousInvocation   ProgramInvocation?  @relation("InvocationGraph", fields: [previousInvocationId], references: [id])
+  previousInvocationId Int?
+  nextInvocations      ProgramInvocation[] @relation("InvocationGraph")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([programId])
+}
