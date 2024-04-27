@@ -63,6 +63,7 @@ model ProgramVersion {
   signature   String
   description String
   fitness     Float    @default(0.0)
+  runTries    Int      @default(0)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 

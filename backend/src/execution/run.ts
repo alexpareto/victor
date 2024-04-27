@@ -1,5 +1,6 @@
 import { prisma } from "@/clients";
 import { executePrograms, type ExecuteResult } from "@/execution/execute";
+import { rewriteProgram } from "@/execution/rewrite";
 import {
   Program,
   ProgramVersion,
@@ -56,6 +57,8 @@ type ExecutionNode = {
   children: ExecutionNode[];
 };
 
+const MAX_RUN_RETRIES = 3;
+
 export const runProgram = async (
   programVersion: ProgramVersion,
   args: any[]
@@ -94,7 +97,17 @@ const result = runProgram(${program!.name}, rawArgs)
   const result = await executePrograms(programToRun);
 
   if (result.errorType !== null) {
-    return result;
+    if (programVersion.runTries > MAX_RUN_RETRIES) {
+      return result;
+    }
+
+    const updatedProgramVersion = await rewriteProgram(
+      programVersion,
+      result.error!,
+      result.errorType
+    );
+
+    return runProgram(updatedProgramVersion, args);
   }
 
   const rootNode = result.value;

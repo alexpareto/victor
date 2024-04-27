@@ -19,7 +19,7 @@ function execPromise(
 
 const EXECUTION_ENVIRONMENT_PATH = "../victor-execution";
 
-enum ErrorType {
+export enum ErrorType {
   TYPE_CHECK_ERROR = "TYPE_CHECK_ERROR",
   BUILD_ERROR = "BUILD_ERROR",
   EXECUTION_ERROR = "EXECUTION_ERROR",
