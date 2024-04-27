@@ -2,6 +2,7 @@ import express, { Express, Request, Response } from "express";
 import dotenv from "dotenv";
 import cors from "cors";
 import { prisma } from "./clients";
+import { generateFunctionBodies } from "./function_generator";
 
 dotenv.config();
 
@@ -28,6 +29,6 @@ app.post("/api/test-model", async (req: Request, res: Response) => {
   }
 });
 
-app.listen(port, () => {
+app.listen(port, async () => {
   console.log(`[server]: Server is running at http://localhost:${port}`);
 });

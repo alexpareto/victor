@@ -4,7 +4,7 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "start:dev": "npx nodemon"
+    "dev": "npx nodemon"
   },
   "dependencies": {
     "@prisma/client": "5.13.0",
