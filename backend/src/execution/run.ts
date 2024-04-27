@@ -41,7 +41,7 @@ export const runPrograms = async (programs: string[], programToRun: string) => {
 
     // Finally, execute the program file
     const { stdout: stdoutExec, stderr: stderrExec } = await execPromise(
-      `node dist/program.js`,
+      `node dist/programs.js`,
       {
         cwd: path.join(EXECUTION_ENVIRONMENT_PATH),
       }
