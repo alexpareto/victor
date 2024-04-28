@@ -1,8 +1,10 @@
 {
-  "presets": ["@babel/preset-env", "@babel/preset-typescript"],
+  // "presets": [ "@babel/preset-typescript", "@babel/preset-env",],
     "plugins": [
-      "./wrap-fns.js"
-    ],
+      "./wrap-fns.js",
+      "@babel/plugin-transform-typescript",
+      "@babel/plugin-transform-modules-commonjs"
+    ]
 
   }
   
