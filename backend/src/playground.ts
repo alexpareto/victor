@@ -29,7 +29,7 @@ async function fib(n: number): Promise<number> {
   if (n <= 1) {
       return n;
   }
-  return fib(n - 1) + fib(n - 2);
+  return await fib(n - 1) + await fib(n - 2);
 }
 `;
 

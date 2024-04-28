@@ -28,26 +28,28 @@ export const backprop = async (
   const randomIndex = Math.floor(Math.random() * inputArgsResults.length);
   const randomInputArgs = inputArgsResults[randomIndex].inputArgs;
 
-  const bestStartProgramVersion = await prisma.programVersion.findFirst({
-    where: {
-      programId: startProgram.id,
-    },
-    orderBy: {
-      fitness: "desc",
-    },
-  });
+  // if (startProgram.id === optionOne.id) {
 
-  const runOne = await runProgram(
-    bestStartProgramVersion!,
-    randomInputArgs as any,
-    [optionOne]
-  );
+  // }
 
-  const runTwo = await runProgram(
-    bestStartProgramVersion!,
-    randomInputArgs as any,
-    [optionTwo]
-  );
+  // let bestStartProgramVersion: ProgramVersion
+
+  // = await prisma.programVersion.findFirst({
+  //   where: {
+  //     programId: startProgram.id,
+  //   },
+  //   orderBy: {
+  //     fitness: "desc",
+  //   },
+  // });
+
+  const runOne = await runProgram(optionOne!, randomInputArgs as any, [
+    optionOne,
+  ]);
+
+  const runTwo = await runProgram(optionTwo!, randomInputArgs as any, [
+    optionTwo,
+  ]);
 
   const overallOutputRunOne = (runOne as any).outputArgs;
   const overallOutputRunTwo = (runOne as any).outputArgs;
@@ -76,15 +78,31 @@ export const backprop = async (
       { role: "system", content: evalSystemPrompt },
       { role: "user", content: evalUserPrompt },
     ],
-    model: "gpt-4-turbo-04-09-2024",
+    model: "gpt-4-turbo-2024-04-09",
   });
 
   if (inference.output.includes("TRUE")) {
     optionOne.fitness = Math.min(1, Math.max(0, optionOne.fitness + 0.01));
     optionTwo.fitness = Math.min(1, Math.max(0, optionTwo.fitness - 0.01));
+    await prisma.programVersion.update({
+      where: { id: optionOne.id },
+      data: { fitness: optionOne.fitness },
+    });
+    await prisma.programVersion.update({
+      where: { id: optionTwo.id },
+      data: { fitness: optionTwo.fitness },
+    });
   } else {
     optionOne.fitness = Math.min(1, Math.max(0, optionOne.fitness - 0.01));
     optionTwo.fitness = Math.min(1, Math.max(0, optionTwo.fitness + 0.01));
+    await prisma.programVersion.update({
+      where: { id: optionOne.id },
+      data: { fitness: optionOne.fitness },
+    });
+    await prisma.programVersion.update({
+      where: { id: optionTwo.id },
+      data: { fitness: optionTwo.fitness },
+    });
   }
   console.log("done");
 };

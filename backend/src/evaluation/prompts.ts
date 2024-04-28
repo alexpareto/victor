@@ -4,7 +4,7 @@ export const evaluationSystemTemplate = () => {
 
     You will get the two functions, and the output of the two functions. If the function is downstream of the main entrypoint, you might get more functions. Only evaluate the main function, but look at the the upstream result.
 
-    Output: "TRUE" if function 1 is better. "FALSE" if function 2 is better
+    Output: "TRUE" if function 1 is better. "FALSE" if function 2 is better. ONLY OUTPUT TRUE or FALSE, nothing else.
     `;
 };
 
