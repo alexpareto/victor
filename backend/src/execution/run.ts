@@ -1,4 +1,5 @@
 import { prisma } from "@/clients";
+import { call_llm } from "@/execution/defaultPrograms";
 import { executePrograms, type ExecuteResult } from "@/execution/execute";
 import { rewriteProgram } from "@/execution/rewrite";
 import {
@@ -6,6 +7,8 @@ import {
   ProgramVersion,
   type ProgramInvocation,
 } from "@prisma/client";
+
+const defaultPrograms = [call_llm];
 
 export const getAllProgramVersionDependencies = async (
   programVersion: ProgramVersion,
@@ -73,7 +76,6 @@ const MAX_RUN_RETRIES = 3;
 export const runProgram = async (
   programVersionIn: ProgramVersion,
   args: any[],
-  defaultPrograms: string[] = [],
   preferredDepenencies: ProgramVersion[] = []
 ): Promise<ExecuteResult | ProgramInvocation> => {
   let programVersion = await prisma.programVersion.findFirst({
@@ -117,7 +119,7 @@ export const runProgram = async (
   ${allProgramVersions.map((pv) => pv.body).join("\n")}
 
   const rawArgs = \`${formattedArgs}\`
-const result = runProgram(${program!.name}, rawArgs)
+const result = runProgram(${program!.name}_wrapper, rawArgs)
   `;
 
   const result = await executePrograms(programToRun);
@@ -132,6 +134,7 @@ const result = runProgram(${program!.name}, rawArgs)
 
     return runProgram(programVersion!, args);
   }
+  console.log("RES", result);
 
   const rootNode = result.value;
 
@@ -143,7 +146,7 @@ const result = runProgram(${program!.name}, rawArgs)
   ) => {
     console.log(allProgramVersions);
     const programVersionForNode = allProgramVersions.find(
-      (pv) => (pv as any).program?.name === node?.name
+      (pv) => (pv as any).program.name === node.name
     )!;
     const programInvocation = await prisma.programInvocation.create({
       data: {
@@ -164,6 +167,8 @@ const result = runProgram(${program!.name}, rawArgs)
       await createProgramInvocations(child, programInvocation.id);
     }
   };
+
+  console.log("ROOT NODe", rootNode);
 
   await createProgramInvocations(rootNode);
 

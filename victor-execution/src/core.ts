@@ -74,14 +74,15 @@ export function updateStateResult(state: State, nodeId: string, result: any) {
   state.current = parent;
 }
 
-export function runProgram(initialFunc: (...args: any[]) => any, args: string) {
+export async function runProgram(
+  initialFunc: (...args: any[]) => any,
+  args: string
+) {
   const state = {
     root: null,
     current: null,
   };
   const parsedArgs = JSON.parse(args);
 
-  const res = initialFunc(state, ...parsedArgs);
-
-  console.log(JSON.stringify(state.root));
+  const res = await initialFunc(state, ...parsedArgs);
 }

@@ -60,7 +60,7 @@ async function testBackprop() {
 
   await runProgram(version1, [4]);
 
-  // await backprop(program, version1, version2);
+  await backprop(program, version1, version2);
 }
 
 const ADD_FN = `

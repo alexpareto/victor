@@ -40,14 +40,12 @@ export const backprop = async (
   const runOne = await runProgram(
     bestStartProgramVersion!,
     randomInputArgs as any,
-    [],
     [optionOne]
   );
 
   const runTwo = await runProgram(
     bestStartProgramVersion!,
     randomInputArgs as any,
-    [],
     [optionTwo]
   );
 
