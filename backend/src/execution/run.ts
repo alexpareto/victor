@@ -119,6 +119,7 @@ export const runProgram = async (
   ${allProgramVersions.map((pv) => pv.body).join("\n")}
 
   const rawArgs = \`${formattedArgs}\`
+  declare var ${program!.name}_wrapper: any;
 const result = runProgram(${program!.name}_wrapper, rawArgs)
   `;
 

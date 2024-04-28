@@ -14,6 +14,7 @@ type Node = {
 };
 
 export function updateState(state: State, funcName: string, ...inArgs: any) {
+  console.log("US");
   const node = {
     id: uuidv4(),
     name: funcName,
@@ -85,4 +86,5 @@ export async function runProgram(
   const parsedArgs = JSON.parse(args);
 
   const res = await initialFunc(state, ...parsedArgs);
+  console.log(JSON.stringify(state.root));
 }
