@@ -62,6 +62,21 @@ export const Test: React.FC = () => {
         position: "relative",
       }}
     >
+      <Drawer
+        opened={isModalOpen}
+        onClose={() => setModalOpen(false)}
+        size="xl"
+        zIndex={9000}
+      >
+        <SyntaxHighlighter
+          wrapLines={true}
+          language="javascript"
+          style={docco}
+          wrapLongLines={true}
+        >
+          {modalContent}
+        </SyntaxHighlighter>
+      </Drawer>
       <Center style={{ flexDirection: "column" }}>
         <Container>
           <Center style={{ flexDirection: "column" }}>
@@ -93,20 +108,6 @@ export const Test: React.FC = () => {
           </Center>
         </Container>
       </Center>
-      <Drawer
-        opened={isModalOpen}
-        onClose={() => setModalOpen(false)}
-        size="xl"
-      >
-        <SyntaxHighlighter
-          wrapLines={true}
-          language="javascript"
-          style={docco}
-          wrapLongLines={true}
-        >
-          {modalContent}
-        </SyntaxHighlighter>
-      </Drawer>
     </AppShell>
   );
 };
