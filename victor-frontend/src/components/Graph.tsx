@@ -68,7 +68,7 @@ export const ProgramGraph: React.FC<Props> = ({ programs, onOpenModal }) => {
     ctx.fillStyle = "black";
     ctx.font = `${fontSize}px Sans-Serif`;
     ctx.textAlign = "center";
-    ctx.fillText(label, node.x, node.y + fontSize);
+    //ctx.fillText(label, node.x, node.y + fontSize);
   };
 
   return (
