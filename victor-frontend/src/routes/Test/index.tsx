@@ -72,10 +72,7 @@ export const Test: React.FC = () => {
                         style={docco}
                         wrapLongLines={true}
                       >
-                        {`function ${version.signature} {\n${version.body
-                          .split("\n")
-                          .map((line) => `    ${line}`)
-                          .join("\n")}\n}`}
+                        {version.body}
                       </SyntaxHighlighter>
                     </div>
                   );

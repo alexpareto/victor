@@ -1,11 +1,15 @@
+import fs from "fs";
+import { cwd } from "process";
+
 export interface TVShows {
-  text: string;
-  metadata: {
-    show: string;
-    season: string;
-    episode: string;
-    title: string;
-  };
+  transcript: string;
+  show: string;
+  season: string;
+  episode: string;
+  title: string;
+  SOURCE: string;
 }
 
-export const shows: TVShows[] = [];
+export const showsTypeString = `{transcript: string, show: string, season: string, episode: string, title: string, SOURCE: string}[]`;
+
+export const showsJsonFilePath = cwd() + "/src/datasets/tv_dialog.json";

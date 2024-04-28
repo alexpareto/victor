@@ -73,6 +73,7 @@ const MAX_RUN_RETRIES = 3;
 export const runProgram = async (
   programVersionIn: ProgramVersion,
   args: any[],
+  defaultPrograms: string[] = [],
   preferredDepenencies: ProgramVersion[] = []
 ): Promise<ExecuteResult | ProgramInvocation> => {
   let programVersion = await prisma.programVersion.findFirst({
@@ -102,6 +103,7 @@ export const runProgram = async (
   const programToRun = `
   import { runProgram } from "./core";
   import { updateState, updateStateResult } from "./core";
+  import fs from 'fs';
   
   function __import_hack() {
     return {
@@ -109,10 +111,12 @@ export const runProgram = async (
       updateStateResult,
     };
   }
+
+  ${defaultPrograms.join("\n")}
   
   ${allProgramVersions.map((pv) => pv.body).join("\n")}
 
-  const rawArgs = "${formattedArgs}"
+  const rawArgs = \`${formattedArgs}\`
 const result = runProgram(${program!.name}, rawArgs)
   `;
 

@@ -3,7 +3,8 @@ import dotenv from "dotenv";
 import cors from "cors";
 import { prisma } from "./clients";
 import { initProgram } from "./generation/program_generator";
-import { shows } from "./datasets/tv_shows";
+import { showsJsonFilePath, showsTypeString } from "./datasets/tv_shows";
+import { executeProgram } from "./execution/executeProgram";
 
 dotenv.config();
 
@@ -37,12 +38,16 @@ app.post("/api/programs", async (req: Request, res: Response) => {
     return res.status(400);
   }
 
-  const program = await initProgram(prompt, shows);
+  const program = await initProgram(prompt, showsTypeString);
   // get program with versions and return it
-  const programWithVersions = await prisma.program.findFirst({
+  const programWithVersions = await prisma.program.findFirstOrThrow({
     where: { id: program.id },
-    include: { versions: true },
+    include: { versions: { include: { program: true } } },
   });
+  console.log(programWithVersions);
+
+  const results = await executeProgram(programWithVersions, showsJsonFilePath);
+
   res.status(201).json({ program: programWithVersions });
 });
 
