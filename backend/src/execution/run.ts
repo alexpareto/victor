@@ -7,8 +7,9 @@ import {
   type ProgramInvocation,
 } from "@prisma/client";
 
-const getAllProgramVersionDependencies = async (
-  programVersion: ProgramVersion
+export const getAllProgramVersionDependencies = async (
+  programVersion: ProgramVersion,
+  preferredDepenencies: ProgramVersion[] = []
 ) => {
   let allProgramVersionDepedencies: ProgramVersion[] = [];
 
@@ -27,9 +28,18 @@ const getAllProgramVersionDependencies = async (
 
     let newProgramDependencies: Program[] = [];
     for (const program of currentProgramDependencies) {
-      const programVersion = await prisma.programVersion.findFirst({
+      // if (preferredDepenencies.some((pv) => pv.programId === program.id)) {
+      //   programVersion = preferredDepenencies.find(
+      //     (pv) => pv.programId === program.id
+      //   )!;
+      // } else {
+      const preferredProgramVersion = preferredDepenencies.find(
+        (pv) => pv.programId === program.id
+      )!;
+      const chosenProgramVersion = await prisma.programVersion.findFirst({
         where: {
           programId: program.id,
+          id: preferredProgramVersion ? preferredProgramVersion.id : undefined,
         },
         orderBy: {
           fitness: "desc", // Assuming the field is named 'fitnessScore'
@@ -39,10 +49,11 @@ const getAllProgramVersionDependencies = async (
           program: true,
         },
       });
+      // });
 
-      allProgramVersionDepedencies.push(programVersion!);
+      allProgramVersionDepedencies.push(chosenProgramVersion!);
 
-      newProgramDependencies.push(...programVersion!.dependencies);
+      newProgramDependencies.push(...chosenProgramVersion!.dependencies);
     }
     currentProgramDependencies = newProgramDependencies;
   }
@@ -61,7 +72,8 @@ const MAX_RUN_RETRIES = 3;
 
 export const runProgram = async (
   programVersionIn: ProgramVersion,
-  args: any[]
+  args: any[],
+  preferredDepenencies: ProgramVersion[] = []
 ): Promise<ExecuteResult | ProgramInvocation> => {
   let programVersion = await prisma.programVersion.findFirst({
     where: {
@@ -73,7 +85,8 @@ export const runProgram = async (
   });
 
   const programVersionDependencies = await getAllProgramVersionDependencies(
-    programVersion!
+    programVersion!,
+    preferredDepenencies
   );
   console.log("Dependencies", programVersionDependencies);
 
@@ -107,6 +120,7 @@ const result = runProgram(${program!.name}, rawArgs)
 
   if (result.errorType !== null) {
     try {
+      console.log(result);
       await rewriteProgram(allProgramVersions, result.error!, result.errorType);
     } catch (e) {
       return result;
@@ -125,7 +139,7 @@ const result = runProgram(${program!.name}, rawArgs)
   ) => {
     console.log(allProgramVersions);
     const programVersionForNode = allProgramVersions.find(
-      (pv) => (pv as any).program.name === node.name
+      (pv) => (pv as any).program?.name === node?.name
     )!;
     const programInvocation = await prisma.programInvocation.create({
       data: {

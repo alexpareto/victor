@@ -3,6 +3,65 @@ import { testCompletion } from "./inference/inference";
 // import { runPrograms } from "@/execution/execute";
 import { prisma } from "@/clients";
 import { runProgram } from "@/execution/run";
+import { backprop } from "@/evaluation/evaluate";
+
+const B1_FN = `
+async function fib(n: number): Promise<number> {
+  if (n <= 0) {
+      return 0;
+  }
+  if (n === 1) {
+      return 1;
+  }
+  let previous = 0;
+  let current = 1;
+  for (let i = 2; i <= n; i++) {
+      let next = previous + current;
+      previous = current;
+      current = next;
+  }
+  return current;
+}
+`;
+
+const B2_FN = `
+async function fib(n: number): Promise<number> {
+  if (n <= 1) {
+      return n;
+  }
+  return fib(n - 1) + fib(n - 2);
+}
+`;
+
+async function testBackprop() {
+  const program = await prisma.program.create({
+    data: {
+      name: "fib",
+    },
+  });
+  const version1 = await prisma.programVersion.create({
+    data: {
+      body: B1_FN,
+      programId: program.id,
+      signature: "async function fib(n: number): number",
+      description: "add two numbers",
+      fitness: 0.5,
+    },
+  });
+  const version2 = await prisma.programVersion.create({
+    data: {
+      body: B2_FN,
+      programId: program.id,
+      signature: "async function fib(n: number): number",
+      description: "add two numbers",
+      fitness: 0.5,
+    },
+  });
+
+  await runProgram(version1, [4]);
+
+  // await backprop(program, version1, version2);
+}
 
 const ADD_FN = `
 function add(a, b: number)  {
@@ -72,4 +131,4 @@ async function main() {
 }
 
 // main();
-createSamples();
+testBackprop();
