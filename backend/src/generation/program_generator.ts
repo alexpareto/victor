@@ -8,12 +8,19 @@ import { Program } from "@prisma/client";
 export const initProgram = async (
   description: string,
   datasetTypeString: string
-): Promise<Program> => {
+): Promise<[Program, Promise<Program>]> => {
   const initalProgramSignature = `solvePrompt(datasetFilePath: string): Promise<string>`;
   const programName = `solvePrompt`;
+  // create the base program
+  const program = await prisma.program.create({
+    data: {
+      name: programName,
+    },
+  });
 
-  // recursively generate the function bodies
-  return await generatePrograms(
+  // kick off program generation but don't await so we can get the program id
+  const programGenerationPromise = generatePrograms(
+    program,
     {
       description,
       name: programName,
@@ -23,6 +30,7 @@ export const initProgram = async (
     },
     0
   );
+  return [program, programGenerationPromise];
 };
 
 export type ProgramGenerationDetails = {
@@ -35,18 +43,13 @@ export type ProgramGenerationDetails = {
 
 // recursively generates all the programs and then saves them to the DB
 const generatePrograms = async (
+  program: Program,
   details: ProgramGenerationDetails,
   recursion_level: number
 ): Promise<Program> => {
   console.log(
     `GENERATING PROGRAM (${details.name}) RECURSION LEVEL ${recursion_level}`
   );
-  // create the base program
-  const program = await prisma.program.create({
-    data: {
-      name: details.name,
-    },
-  });
 
   // generate the program versions
   const programVersions = await generateFunctionBodies(details, 3);
@@ -56,10 +59,26 @@ const generatePrograms = async (
       console.log(
         `generating ${programVersion.sub_functions.length} subfunctions for program: ${program.name} and version:${index} and recursion level: ${recursion_level}`
       );
+      const dbVersion = await prisma.programVersion.create({
+        data: {
+          body: programVersion.function_string,
+          signature: details.signature,
+          description: details.description,
+          programId: program.id,
+          fitness: Math.random(),
+        },
+      });
 
       const subProgramsPromises = programVersion.sub_functions.map(
         async (sub_function) => {
+          const subProgram = await prisma.program.create({
+            data: {
+              name: sub_function.name,
+            },
+          });
+
           return await generatePrograms(
+            subProgram,
             {
               description: sub_function.description,
               signature: sub_function.signature,
@@ -73,12 +92,9 @@ const generatePrograms = async (
       const subPrograms = await Promise.all(subProgramsPromises);
 
       // now create the programversion and add the subprograms as dependencies
-      const dbVersion = await prisma.programVersion.create({
+      const dbVersionUpdated = await prisma.programVersion.update({
+        where: { id: dbVersion.id },
         data: {
-          body: programVersion.function_string,
-          signature: details.signature,
-          description: details.description,
-          programId: program.id,
           dependencies: {
             connect: subPrograms.map((program) => ({ id: program.id })),
           },

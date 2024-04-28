@@ -31,6 +31,39 @@ app.post("/api/test-model", async (req: Request, res: Response) => {
   }
 });
 
+app.get("/api/programs/:id", async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const programWithVersionsWithDependencies =
+    await prisma.program.findFirstOrThrow({
+      where: { id: Number(id) },
+      include: {
+        versions: {
+          include: {
+            dependencies: {
+              include: {
+                versions: {
+                  include: {
+                    dependencies: {
+                      include: {
+                        versions: {
+                          include: {
+                            dependencies: { include: { versions: true } },
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+
+  res.status(201).json({ program: programWithVersionsWithDependencies });
+});
+
 app.post("/api/programs", async (req: Request, res: Response) => {
   const { prompt } = req.body;
   console.log("got body", req.body);
@@ -38,8 +71,15 @@ app.post("/api/programs", async (req: Request, res: Response) => {
     return res.status(400);
   }
 
-  const program = await initProgram(prompt, showsTypeString);
+  const [program, programGenerationPromise] = await initProgram(
+    prompt,
+    showsTypeString
+  );
+  // return the program, but await the promise so we can run things
+  res.status(201).json({ program: { ...program, versions: [] } });
+
   // get program with versions and return it
+  await programGenerationPromise;
   const programWithVersions = await prisma.program.findFirstOrThrow({
     where: { id: program.id },
     include: { versions: { include: { program: true } } },
@@ -47,8 +87,6 @@ app.post("/api/programs", async (req: Request, res: Response) => {
   console.log(programWithVersions);
 
   const results = await executeProgram(programWithVersions, showsJsonFilePath);
-
-  res.status(201).json({ program: programWithVersions });
 });
 
 app.listen(port, async () => {

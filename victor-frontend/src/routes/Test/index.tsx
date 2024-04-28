@@ -1,10 +1,22 @@
-import { AppShell, Burger, Button, Input } from "@mantine/core";
+import {
+  AppShell,
+  Burger,
+  Button,
+  Center,
+  Container,
+  Drawer,
+  Input,
+  Modal,
+  Text,
+  Title,
+} from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import styled from "@emotion/styled";
 import { useState } from "react";
 import axios from "axios";
 import config from "@/config";
-import { Program } from "@/utils/clientTypes";
+import { ProgramGraph } from "@/components/Graph";
+import { Program, ProgramVersion } from "../utils/clientTypes";
 import SyntaxHighlighter from "react-syntax-highlighter";
 import { docco } from "react-syntax-highlighter/dist/esm/styles/hljs";
 
@@ -13,6 +25,9 @@ const Header = styled.h1`
 `;
 
 export const Test: React.FC = () => {
+  const [isModalOpen, setModalOpen] = useState(false);
+  const [modalContent, setModalContent] = useState("");
+
   const [opened, { toggle }] = useDisclosure();
 
   const [program, setProgram] = useState<Program | null>(null);
@@ -26,62 +41,72 @@ export const Test: React.FC = () => {
     });
     setProgram(result.data.program);
     setLoading(false);
+    pollForPrograms(result.data.program.id);
+  };
+
+  const pollForPrograms = (programId: string) => {
+    setInterval(async () => {
+      const result = await axios.get(
+        `${config.backendHost}/api/programs/${programId}`,
+      );
+      setProgram(result.data.program);
+    }, 2000);
   };
 
   return (
-    <>
-      <AppShell
-        header={{ height: 60 }}
-        navbar={{
-          width: 300,
-          breakpoint: "sm",
-          collapsed: { mobile: !opened },
-        }}
-        padding="md"
+    <AppShell
+      style={{
+        height: "100vh",
+        width: "100vw",
+        paddingTop: 30,
+        position: "relative",
+      }}
+    >
+      <Center style={{ flexDirection: "column" }}>
+        <Container>
+          <Center style={{ flexDirection: "column" }}>
+            <Title>RARG</Title>
+            <Input
+              placeholder="What are you looking for?"
+              value={promptInput}
+              onChange={(e) => setPromptInput(e.target.value)}
+              style={{ width: 800, paddingBottom: 30 }}
+            />
+            <Button loading={loading} onClick={generateProgram}>
+              RARG it
+            </Button>
+            <div>
+              {program && (
+                <div>
+                  <div style={{ height: "100%", width: "100%" }}>
+                    <ProgramGraph
+                      programs={[program]}
+                      onOpenModal={(content) => {
+                        setModalContent(content);
+                        setModalOpen(true);
+                      }}
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+          </Center>
+        </Container>
+      </Center>
+      <Drawer
+        opened={isModalOpen}
+        onClose={() => setModalOpen(false)}
+        size="xl"
       >
-        <AppShell.Header>
-          <Burger opened={opened} onClick={toggle} hiddenFrom="sm" size="sm" />
-          <div>Logo</div>
-        </AppShell.Header>
-
-        <AppShell.Navbar p="md">Navbar</AppShell.Navbar>
-
-        <AppShell.Main>
-          <Input
-            placeholder="Enter your input here"
-            value={promptInput}
-            onChange={(e) => setPromptInput(e.target.value)}
-          />
-          <Button loading={loading} onClick={generateProgram}>
-            Generate
-          </Button>
-          <div>
-            {program && (
-              <div>
-                <Header>{program.name}</Header>
-                {program.versions.map((version) => {
-                  return (
-                    <div style={{ maxWidth: 800, fontSize: 12 }}>
-                      <h3>
-                        Version {version.id} - Fitness: {version.fitness}
-                      </h3>
-                      <p>Body:</p>
-                      <SyntaxHighlighter
-                        wrapLines={true}
-                        language="javascript"
-                        style={docco}
-                        wrapLongLines={true}
-                      >
-                        {version.body}
-                      </SyntaxHighlighter>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-        </AppShell.Main>
-      </AppShell>
-    </>
+        <SyntaxHighlighter
+          wrapLines={true}
+          language="javascript"
+          style={docco}
+          wrapLongLines={true}
+        >
+          {modalContent}
+        </SyntaxHighlighter>
+      </Drawer>
+    </AppShell>
   );
 };

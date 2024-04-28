@@ -14,4 +14,6 @@ export type ProgramVersion = {
   fitness: number;
   createdAt: Date;
   updatedAt: Date;
+
+  dependencies: Program[];
 };
