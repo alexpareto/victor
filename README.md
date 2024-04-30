@@ -1,5 +1,5 @@
 # Victor: Higher Intelligence with LLMs
-By [Alex Pareto](https://alexpareto.com/) and [Sam Kaplan](https://samkaplan.me/)
+By [Alex Pareto](https://alexpareto.com/) and [Sam Kaplan](https://samkaplan.me/) for the [Pear+OpenAI hackathon](https://pear.vc/events/pear-vc-x-open-ai-hackathon/).
 
 ![Frontend](readme-image-2.png)
 
