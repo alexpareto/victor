@@ -1,4 +1,6 @@
 # Victor: Higher Intelligence with LLMs
+By [Alex Pareto](https://alexpareto.com/) and [Sam Kaplan](https://samkaplan.me/)
+
 ![Frontend](readme-image-2.png)
 
 Victor is a new architecture for higher-level intelligence with LLMs. Right now, LLMs are limited in their ability to learn. After the initial train, you’re pretty much limited fine-tuning them. This is a manual and brittle process.
